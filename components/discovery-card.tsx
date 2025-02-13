@@ -4,7 +4,7 @@ import { View, Text, Image, TouchableOpacity, TouchableOpacityProps } from 'reac
 
 interface DiscoveryCardProps<T> extends TouchableOpacityProps {
     item: T;
-    variant?: 'default' | 'artist' | 'play' | 'trending';
+    variant?: 'default' | 'artist' | 'play' | 'trending' | 'playlist';
     handlePress: () => void;
 }
 
@@ -81,6 +81,35 @@ const DiscoveryCard: React.FC<DiscoveryCardProps<any>> = ({
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
+                </View>
+            );
+            break;
+        case 'playlist':
+            cardContent = (
+                <View
+                    className={`relative py-4 flex flex-row items-center justify-between gap-4 ${isPlaying ? 'bg-white/20' : ''
+                        }`}
+                >
+                    <View className="flex flex-row mx-4 items-center gap-4">
+                        <Image
+                            source={item.src}
+                            className="w-20 h-20 rounded-md"
+                            resizeMode="contain"
+                        />
+                        <View className="items-start">
+                            <Text className="text-white/90 text-center font-pmedium text-xl mt-2">
+                                {item.title}
+                            </Text>
+                            <View className="flex-row items-center justify-center mt-2">
+                                <Text className="text-[#CDCDE0] font-pregular text-base">Playlist</Text>
+                                <Text className="text-4xl text-[#CDCDE0] mx-1">·</Text>
+                                <Text className="text-[#CDCDE0] font-pregular text-base">{item.title}</Text>
+                            </View>
+
+
+                        </View>
+                    </View>
+
                 </View>
             );
             break;

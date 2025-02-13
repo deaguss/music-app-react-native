@@ -5,6 +5,7 @@ import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
 import images from "@/constants/images";
 import { CustomButton, FormField } from "@/components";
+import { LinearGradient } from "expo-linear-gradient";
 // import { getCurrentUser, signIn } from "../../lib/appwrite";
 // import { useGlobalContext } from "../../context/GlobalProvider";
 
@@ -39,62 +40,70 @@ const SignIn = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <ScrollView>
-        <View
-          className="w-full justify-center h-full px-4 my-6"
-          style={{
-            minHeight: Dimensions.get("window").height - 100,
-          }}
-        >
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[115px] h-[34px] self-center"
-          />
+    <LinearGradient
+      colors={['#393939', '#18181b', '#101010']}
+      locations={[0, 0.25, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView className=" h-full">
+        <ScrollView>
+          <View
+            className="w-full justify-center h-full px-4 my-6"
+            style={{
+              minHeight: Dimensions.get("window").height - 100,
+            }}
+          >
+            <Image
+              source={images.logo}
+              resizeMode="contain"
+              className="w-[115px] h-[34px] self-center"
+            />
 
-          <Text className="text-2xl font-semibold text-center text-white mt-10 font-psemibold">
-            Log in to NoirBeats
-          </Text>
-
-          <FormField
-            title="Email"
-            value={form.email}
-            placeholder=""
-            handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          />
-
-          <FormField
-            title="Password"
-            value={form.password}
-            placeholder=""
-            handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
-          />
-
-          <CustomButton
-            title="Sign In"
-            handlePress={submit}
-            containerStyles="mt-7"
-            isLoading={isSubmitting}
-          />
-
-          <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Don't have an account?
+            <Text className="text-2xl font-semibold text-center text-white mt-10 font-psemibold">
+              Log in to NoirBeats
             </Text>
-            <Link
-              href="/sign-up"
-              className="text-lg font-psemibold text-secondary"
-            >
-              Signup
-            </Link>
+
+            <FormField
+              title="Email"
+              value={form.email}
+              placeholder=""
+              handleChangeText={(e) => setForm({ ...form, email: e })}
+              otherStyles="mt-7"
+              keyboardType="email-address"
+            />
+
+            <FormField
+              title="Password"
+              value={form.password}
+              placeholder=""
+              handleChangeText={(e) => setForm({ ...form, password: e })}
+              otherStyles="mt-7"
+            />
+
+            <CustomButton
+              title="Sign In"
+              handlePress={submit}
+              containerStyles="mt-7"
+              isLoading={isSubmitting}
+            />
+
+            <View className="flex justify-center pt-5 flex-row gap-2">
+              <Text className="text-lg text-gray-100 font-pregular">
+                Don't have an account?
+              </Text>
+              <Link
+                href="/sign-up"
+                className="text-lg font-psemibold text-secondary"
+              >
+                Signup
+              </Link>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 

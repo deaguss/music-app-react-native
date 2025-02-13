@@ -11,5 +11,7 @@ export default {
     eyeHide: require("../assets/icons/eye-hide.png"),
     eye: require("../assets/icons/eye.png"),
     play: require("../assets/icons/play.png"),
-    paused: require("../assets/icons/pause.png")
+    paused: require("../assets/icons/pause.png"),
+    plus: require("../assets/icons/plus.png"),
+    camera: require("../assets/icons/camera.png")
 }

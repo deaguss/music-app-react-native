@@ -44,6 +44,7 @@ const TabLayout = () => {
                 screenOptions={{
                     tabBarActiveTintColor: "#eab308",
                     tabBarInactiveTintColor: "#CDCDE0",
+                    tabBarHideOnKeyboard: true,
                     tabBarShowLabel: false,
                     tabBarStyle: {
                         borderWidth: 0.5,

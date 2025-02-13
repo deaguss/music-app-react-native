@@ -5,6 +5,7 @@ import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
 import images from "@/constants/images";
 import { FormField, CustomButton } from "@/components";
+import { LinearGradient } from "expo-linear-gradient";
 // import { createUser } from "@/lib/appwrite";
 // import { CustomButton, FormField } from "@/components";
 // import { useGlobalContext } from "../../context/GlobalProvider";
@@ -39,70 +40,78 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <ScrollView>
-        <View
-          className="w-full flex justify-center h-full px-4 my-6"
-          style={{
-            minHeight: Dimensions.get("window").height - 100,
-          }}
-        >
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[115px] h-[34px] self-center"
-          />
+    <LinearGradient
+      colors={['#393939', '#18181b', '#101010']}
+      locations={[0, 0.25, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView className="h-full">
+        <ScrollView>
+          <View
+            className="w-full flex justify-center h-full px-4 my-6"
+            style={{
+              minHeight: Dimensions.get("window").height - 100,
+            }}
+          >
+            <Image
+              source={images.logo}
+              resizeMode="contain"
+              className="w-[115px] h-[34px] self-center"
+            />
 
-          <Text className="text-2xl font-semibold text-center text-white mt-10 font-psemibold">
-            Sign Up to NoirBeats
-          </Text>
-
-          <FormField
-            title="Username"
-            placeholder=""
-            value={form.username}
-            handleChangeText={(e) => setForm({ ...form, username: e })}
-            otherStyles="mt-10"
-          />
-
-          <FormField
-            title="Email"
-            placeholder=""
-            value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          />
-
-          <FormField
-            title="Password"
-            placeholder=""
-            value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
-          />
-
-          <CustomButton
-            title="Sign Up"
-            handlePress={submit}
-            containerStyles="mt-7"
-            isLoading={isSubmitting}
-          />
-
-          <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Have an account already?
+            <Text className="text-2xl font-semibold text-center text-white mt-10 font-psemibold">
+              Sign Up to NoirBeats
             </Text>
-            <Link
-              href="/sign-in"
-              className="text-lg font-psemibold text-secondary"
-            >
-              Login
-            </Link>
+
+            <FormField
+              title="Username"
+              placeholder=""
+              value={form.username}
+              handleChangeText={(e) => setForm({ ...form, username: e })}
+              otherStyles="mt-10"
+            />
+
+            <FormField
+              title="Email"
+              placeholder=""
+              value={form.email}
+              handleChangeText={(e) => setForm({ ...form, email: e })}
+              otherStyles="mt-7"
+              keyboardType="email-address"
+            />
+
+            <FormField
+              title="Password"
+              placeholder=""
+              value={form.password}
+              handleChangeText={(e) => setForm({ ...form, password: e })}
+              otherStyles="mt-7"
+            />
+
+            <CustomButton
+              title="Sign Up"
+              handlePress={submit}
+              containerStyles="mt-7"
+              isLoading={isSubmitting}
+            />
+
+            <View className="flex justify-center pt-5 flex-row gap-2">
+              <Text className="text-lg text-gray-100 font-pregular">
+                Have an account already?
+              </Text>
+              <Link
+                href="/sign-in"
+                className="text-lg font-psemibold text-secondary"
+              >
+                Login
+              </Link>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
