@@ -1,7 +1,9 @@
 import { SplashScreen, Stack } from "expo-router";
 import "@/global.css";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { PlayerModalProvider } from "@/provider/player-provider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,10 +36,14 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PlayerModalProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </PlayerModalProvider>
+    </GestureHandlerRootView>
   );
 }

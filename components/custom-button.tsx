@@ -7,7 +7,7 @@ interface CustomButtonProps {
   containerStyles?: string;
   textStyles?: string;
   isLoading?: boolean;
-  variant?: "default" | "ghost" | "descriptive";
+  variant?: "default" | "ghost" | "descriptive" | "badge";
   description?: string;
 }
 
@@ -32,14 +32,17 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       variantContainerStyles = "bg-yellow-500";
       variantTextStyles = "text-white";
       break;
-    case "default":
+    case "badge":
+      variantContainerStyles = "bg-black/10 rounded-full border border-zinc-200/20 focus:border-zinc-50";
+      variantTextStyles = "text-white";
+      break;
     default:
-      variantContainerStyles = "bg-yellow-500";
+      variantContainerStyles = "bg-yellow-500 rounded-xl px-4 min-h-[62px]";
       variantTextStyles = "text-white";
       break;
   }
 
-  const baseContainerStyles = `rounded-xl min-h-[62px] flex flex-row justify-center items-center px-4 ${variantContainerStyles} ${containerStyles}`;
+  const baseContainerStyles = ` flex flex-row justify-center items-center  ${variantContainerStyles} ${containerStyles}`;
   const baseTextStyles = `font-psemibold text-lg ${variantTextStyles} ${textStyles}`;
 
   return (
@@ -50,7 +53,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       className={`${baseContainerStyles} ${isLoading ? "opacity-50" : ""}`}
       disabled={isLoading}
     >
-      
+
       <View className="flex-col items-center">
         <Text className={baseTextStyles}>{title}</Text>
         {variant === "descriptive" && description && (

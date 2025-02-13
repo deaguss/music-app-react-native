@@ -1,6 +1,7 @@
 import { View, Text, Modal, TouchableOpacity, Image, TextInput } from 'react-native'
 import React, { useState } from 'react'
 import icons from '@/constants/icons';
+import { CustomButton } from '@/components';
 
 interface CreatePlaylistProps {
     modalVisible: boolean;
@@ -62,12 +63,11 @@ const CreatePlaylist = ({ modalVisible, setModalVisible }: CreatePlaylistProps) 
                         style={{ height: 50 }}
                     />
 
-                    <TouchableOpacity
-                        onPress={handleSubmit}
-                        className="bg-[#eab308] py-2 rounded-lg items-center mt-2"
-                    >
-                        <Text className="text-[#1E1E1E] font-bold">Create</Text>
-                    </TouchableOpacity>
+                    <CustomButton
+                        title="Create"
+                        containerStyles='min-h-[50px] mt-10'
+                        handlePress={handleSubmit}
+                    />
 
                     <TouchableOpacity
                         onPress={handleCloseModal}

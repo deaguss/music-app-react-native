@@ -2,6 +2,8 @@ import { View, Text, SafeAreaView, Dimensions, ScrollView, FlatList, Image, Aler
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { DiscoveryCard } from '@/components';
+import { router, useNavigation, useRouter } from 'expo-router';
+import { usePlayerModal } from '@/provider/player-provider';
 
 export const data = [
     {
@@ -26,9 +28,10 @@ export const data = [
     }
 ]
 const discover = () => {
+    const { showPlayer } = usePlayerModal();
 
     const handleDiscover = () => {
-        Alert.alert("[discover card]")
+
     };
 
     return (
@@ -77,7 +80,7 @@ const discover = () => {
                             <DiscoveryCard
                                 key={item.id.toString()}
                                 item={item}
-                                handlePress={handleDiscover}
+                                handlePress={showPlayer}
                                 variant='play'
                             />
                         ))}

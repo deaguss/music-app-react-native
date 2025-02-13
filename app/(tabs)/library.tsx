@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import icons from '@/constants/icons'
 import CreatePlaylist from '@/components/create-playlist'
 import { data } from './discover'
-import { DiscoveryCard } from '@/components'
+import { CustomButton, DiscoveryCard } from '@/components'
 
 const headerData = ['Album', 'Artist', 'Playlist', 'Date']
 
@@ -49,11 +49,12 @@ const library = () => {
                     </View>
                     <View className="w-full px-4 flex-row justify-between gap-x-2 mt-2">
                         {headerData.map((data, index) => (
-                            <TouchableOpacity
+                            <CustomButton
+                                variant='badge'
                                 key={index}
-                                className="w-[23%] h-[2.8rem]  bg-black/10 rounded-full border border-zinc-200/20 focus:border-zinc-50 flex justify-center items-center">
-                                <Text className="text-white/95 font-psemibold text-lg">{data}</Text>
-                            </TouchableOpacity>
+                                title={data}
+                                containerStyles='min-h-[40px] w-[23%] flex-row justify-center items-center px-0'
+                                handlePress={() => console.log("[header library]: ", data)} />
                         ))}
                     </View>
                     <View className="w-full my-6 pb-20">
