@@ -1,11 +1,9 @@
 import { StatusBar } from "expo-status-bar";
 import { Redirect, Tabs } from "expo-router";
 import { Image, ImageSourcePropType, Text, View } from "react-native";
-
 import icons from "@/constants/icons";
+import { useAuth } from "@/context/auth-context";
 // import { Loader } from "../../components";
-// import { useGlobalContext } from "../../context/GlobalProvider";
-
 
 interface TabIconProps {
     icon: ImageSourcePropType;
@@ -34,9 +32,9 @@ const TabIcon = ({ icon, color, name, focused }: TabIconProps) => {
 };
 
 const TabLayout = () => {
-    //   const { loading, isLogged } = useGlobalContext();
+    const { isAuthenticated, loading } = useAuth();
 
-    //   if (!loading && !isLogged) return <Redirect href="/sign-in" />;
+    if (!loading && !isAuthenticated) return <Redirect href="/sign-in" />;
 
     return (
         <>

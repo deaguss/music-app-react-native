@@ -1,7 +1,7 @@
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ButtonProps, Text, TouchableOpacity, View } from "react-native";
 
-interface CustomButtonProps {
+interface CustomButtonProps extends ButtonProps {
   title: string;
   handlePress: () => void;
   containerStyles?: string;

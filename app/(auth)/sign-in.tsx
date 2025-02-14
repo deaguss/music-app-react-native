@@ -6,36 +6,22 @@ import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 import images from "@/constants/images";
 import { CustomButton, FormField } from "@/components";
 import { LinearGradient } from "expo-linear-gradient";
-// import { getCurrentUser, signIn } from "../../lib/appwrite";
-// import { useGlobalContext } from "../../context/GlobalProvider";
+import { useAuth } from "@/context/auth-context";
 
 const SignIn = () => {
-  // const { setUser, setIsLogged } = useGlobalContext();
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const { login, loading, error } = useAuth();
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const isDisabled = !credentials.email && !credentials.password
 
-  const submit = async () => {
-    if (form.email === "" || form.password === "") {
-      Alert.alert("Error", "Please fill in all fields");
-    }
 
-    setSubmitting(true);
-
+  const handleSubmit = async () => {
     try {
-      // await signIn(form.email, form.password);
-      // const result = await getCurrentUser();
-      // setUser(result);
-      // setIsLogged(true);
+      await login(credentials);
 
-      Alert.alert("Success", "User signed in successfully");
+      Alert.alert("Success", "Enjoy your music!");
       router.replace("/discover");
-    } catch (error) {
-      // Alert.alert("Error", error.message);
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      Alert.alert("Error", error! || err.message);
     }
   };
 
@@ -67,26 +53,27 @@ const SignIn = () => {
 
             <FormField
               title="Email"
-              value={form.email}
               placeholder=""
-              handleChangeText={(e) => setForm({ ...form, email: e })}
+              value={credentials.email}
+              handleChangeText={(text) => setCredentials({ ...credentials, email: text })}
               otherStyles="mt-7"
               keyboardType="email-address"
             />
 
             <FormField
               title="Password"
-              value={form.password}
+              value={credentials.password}
+              handleChangeText={(text) => setCredentials({ ...credentials, password: text })}
               placeholder=""
-              handleChangeText={(e) => setForm({ ...form, password: e })}
               otherStyles="mt-7"
             />
 
             <CustomButton
               title="Sign In"
-              handlePress={submit}
+              disabled={isDisabled}
+              handlePress={isDisabled ? () => { } : handleSubmit}
               containerStyles="mt-7"
-              isLoading={isSubmitting}
+              isLoading={loading}
             />
 
             <View className="flex justify-center pt-5 flex-row gap-2">

@@ -5,8 +5,23 @@ import images from '@/constants/images'
 import { CustomButton, DiscoveryCard } from '@/components'
 import icons from '@/constants/icons'
 import { data } from './discover'
+import * as SecureStore from 'expo-secure-store';
+import { useAuth } from '@/context/auth-context'
+
 
 const account = () => {
+    const { logout, loading, error } = useAuth();
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            console.log('Session berhasil dihapus, logout berhasil.');
+
+        } catch (error) {
+            console.error('Gagal menghapus session:', error);
+        }
+    };
+
     return (
         <LinearGradient
             colors={['#393939', '#18181b', '#101010']}
@@ -38,7 +53,7 @@ const account = () => {
                         <CustomButton
                             title='Edit'
                             variant='badge'
-                            handlePress={() => console.log("Edit account")}
+                            handlePress={handleLogout} //test
                             containerStyles='min-h-[40px] w-[19%] flex-row justify-center items-center px-0 rounded-full'
                         />
 

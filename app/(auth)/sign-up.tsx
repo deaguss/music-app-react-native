@@ -2,46 +2,41 @@ import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import images from "@/constants/images";
 import { FormField, CustomButton } from "@/components";
-import { LinearGradient } from "expo-linear-gradient";
-// import { createUser } from "@/lib/appwrite";
-// import { CustomButton, FormField } from "@/components";
-// import { useGlobalContext } from "../../context/GlobalProvider";
+import { useAuth } from "@/context/auth-context";
 
 const SignUp = () => {
-  // const { setUser, setIsLogged } = useGlobalContext();
-
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    username: "",
+  const { register, loading, error } = useAuth();
+  const [credentials, setCredentials] = useState({
+    name: "",
     email: "",
     password: "",
+    password_confirmation: ""
   });
 
-  const submit = async () => {
-    if (form.username === "" || form.email === "" || form.password === "") {
-      Alert.alert("Error", "Please fill in all fields");
-    }
+  const confirm_password = credentials.password === credentials.password_confirmation;
 
-    setSubmitting(true);
+  const isDisabled =
+    !credentials.email ||
+    !credentials.password ||
+    !credentials.password_confirmation ||
+    !confirm_password;
+
+  const handleSubmit = async () => {
     try {
-      // const result = await createUser(form.email, form.password, form.username);
-      // setUser(result);
-      // setIsLogged(true);
-
-      // router.replace("/home");
-    } catch (error) {
-      // Alert.alert("Error", error.message);
-    } finally {
-      setSubmitting(false);
+      await register(credentials);
+      router.replace("/discover");
+    } catch (err: any) {
+      Alert.alert("Error", error! || err.message);
     }
   };
 
   return (
     <LinearGradient
-      colors={['#393939', '#18181b', '#101010']}
+      colors={["#393939", "#18181b", "#101010"]}
       locations={[0, 0.25, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
@@ -52,7 +47,7 @@ const SignUp = () => {
           <View
             className="w-full flex justify-center h-full px-4 my-6"
             style={{
-              minHeight: Dimensions.get("window").height - 100,
+              minHeight: Dimensions.get("window").height - 100
             }}
           >
             <Image
@@ -68,16 +63,20 @@ const SignUp = () => {
             <FormField
               title="Username"
               placeholder=""
-              value={form.username}
-              handleChangeText={(e) => setForm({ ...form, username: e })}
+              value={credentials.name}
+              handleChangeText={(text) =>
+                setCredentials({ ...credentials, name: text })
+              }
               otherStyles="mt-10"
             />
 
             <FormField
               title="Email"
               placeholder=""
-              value={form.email}
-              handleChangeText={(e) => setForm({ ...form, email: e })}
+              value={credentials.email}
+              handleChangeText={(text) =>
+                setCredentials({ ...credentials, email: text })
+              }
               otherStyles="mt-7"
               keyboardType="email-address"
             />
@@ -85,16 +84,29 @@ const SignUp = () => {
             <FormField
               title="Password"
               placeholder=""
-              value={form.password}
-              handleChangeText={(e) => setForm({ ...form, password: e })}
+              value={credentials.password}
+              handleChangeText={(text) =>
+                setCredentials({ ...credentials, password: text })
+              }
+              otherStyles="mt-7"
+            />
+
+            <FormField
+              title="Password Confirm"
+              placeholder=""
+              value={credentials.password_confirmation}
+              handleChangeText={(text) =>
+                setCredentials({ ...credentials, password_confirmation: text })
+              }
               otherStyles="mt-7"
             />
 
             <CustomButton
               title="Sign Up"
-              handlePress={submit}
+              handlePress={isDisabled ? () => { } : handleSubmit}
               containerStyles="mt-7"
-              isLoading={isSubmitting}
+              isLoading={loading}
+              disabled={isDisabled || loading}
             />
 
             <View className="flex justify-center pt-5 flex-row gap-2">

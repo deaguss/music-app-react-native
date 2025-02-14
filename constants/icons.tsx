@@ -13,5 +13,12 @@ export default {
     play: require("../assets/icons/play.png"),
     paused: require("../assets/icons/pause.png"),
     plus: require("../assets/icons/plus.png"),
-    camera: require("../assets/icons/camera.png")
+    camera: require("../assets/icons/camera.png"),
+    arrowDown: require("../assets/icons/arrow-down.png"),
+    back: require("../assets/icons/back.png"),
+    heart: require("../assets/icons/heart.png"),
+    heartFill: require("../assets/icons/heart-fill.png"),
+    download: require("../assets/icons/download.png"),
+    shuffle: require("../assets/icons/shuffle.png"),
+    share: require("../assets/icons/share.png")
 }

@@ -4,7 +4,7 @@ import { Audio } from 'expo-av';
 import { PlayerControls } from '@/components';
 
 const { height } = Dimensions.get('window');
-const PANEL_HEIGHT = height;
+const PANEL_HEIGHT = height * 0.99;
 
 export default function Player({ onClose }: { onClose: () => void }) {
     const translateY = useRef(new Animated.Value(height)).current;
@@ -74,8 +74,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#1E1E1E',
-        padding: 20,
+        borderTopEndRadius: 15,
+        borderTopStartRadius: 15,
+        backgroundColor: '#1D1D1D',
+        padding: 0,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,

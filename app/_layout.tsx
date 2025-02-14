@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PlayerModalProvider } from "@/provider/player-provider";
+import { AuthProvider } from "@/context/auth-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,13 +38,15 @@ export default function RootLayout() {
   }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PlayerModalProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </PlayerModalProvider>
+      <AuthProvider>
+        <PlayerModalProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </PlayerModalProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
