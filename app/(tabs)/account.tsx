@@ -2,15 +2,17 @@ import { View, Text, Dimensions, SafeAreaView, ScrollView, Image, TouchableOpaci
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import images from '@/constants/images'
-import { CustomButton, DiscoveryCard } from '@/components'
+import { CustomButton, DiscoveryCard, ModalComponent } from '@/components'
 import icons from '@/constants/icons'
 import { data } from './discover'
-import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/context/auth-context'
+import { useModal } from '@/provider/modal-provider'
+import { useRef } from 'react'
 
 
 const account = () => {
     const { logout, loading, error } = useAuth();
+    const { showModal, isVisible } = useModal()
 
     const handleLogout = async () => {
         try {
@@ -57,7 +59,7 @@ const account = () => {
                             containerStyles='min-h-[40px] w-[19%] flex-row justify-center items-center px-0 rounded-full'
                         />
 
-                        <TouchableOpacity onPress={() => console.log('Menu account')}>
+                        <TouchableOpacity onPress={showModal}>
                             <Image
                                 source={icons.menu}
                                 className='w-6 h-6'
@@ -85,6 +87,11 @@ const account = () => {
                             containerStyles='min-h-[60px] w-1/3 flex-row justify-center items-center px-0 rounded-full self-center bg-black/5'
                         />
                     </View>
+                    {isVisible && (
+                        <ModalComponent>
+                            <Text>Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita reprehenderit magnam odit sunt accusamus voluptatem obcaecati eaque quae, repellat architecto autem deserunt aut ut quas laborum dolores. Totam, numquam fugit.</Text>
+                        </ModalComponent>
+                    )}
                 </ScrollView>
             </SafeAreaView>
         </LinearGradient>

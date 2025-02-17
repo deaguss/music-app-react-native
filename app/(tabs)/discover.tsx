@@ -1,9 +1,10 @@
 import { View, Text, SafeAreaView, Dimensions, ScrollView, FlatList, Image, Alert } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { DiscoveryCard } from '@/components';
 import { router, useNavigation, useRouter } from 'expo-router';
 import { usePlayerModal } from '@/provider/player-provider';
+import { useMusicPlayer } from '@/context/music-player-context';
 
 export const data = [
     {
@@ -29,10 +30,12 @@ export const data = [
 ]
 const discover = () => {
     const { showPlayer } = usePlayerModal();
+    const { queue, loadQueue, loadTrack } = useMusicPlayer();
 
-    const handleDiscover = () => {
 
-    };
+    useEffect(() => {
+        loadQueue();
+    }, []);
 
     return (
         <LinearGradient
@@ -52,11 +55,11 @@ const discover = () => {
 
                         <FlatList
                             horizontal
-                            data={data}
+                            data={queue}
                             keyExtractor={(item) => item.id.toString()}
                             showsHorizontalScrollIndicator={false}
                             renderItem={({ item }) => (
-                                <DiscoveryCard item={item} handlePress={handleDiscover} />
+                                <DiscoveryCard item={item} handlePress={() => loadTrack(item.id.toString())} />
                             )}
                             contentContainerStyle={{ paddingHorizontal: 1 }}
                         />
@@ -69,7 +72,7 @@ const discover = () => {
                             keyExtractor={(item) => item.id.toString()}
                             showsHorizontalScrollIndicator={false}
                             renderItem={({ item }) => (
-                                <DiscoveryCard item={item} handlePress={handleDiscover} variant='artist' />
+                                <DiscoveryCard item={item} handlePress={() => { }} variant='artist' />
                             )}
                             contentContainerStyle={{ paddingHorizontal: 1 }}
                         />

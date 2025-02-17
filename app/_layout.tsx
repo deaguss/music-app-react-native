@@ -5,6 +5,8 @@ import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PlayerModalProvider } from "@/provider/player-provider";
 import { AuthProvider } from "@/context/auth-context";
+import { MusicPlayerProvider } from "@/context/music-player-context";
+import { ModalProvider } from "@/provider/modal-provider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,13 +41,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <PlayerModalProvider>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
-        </PlayerModalProvider>
+        <MusicPlayerProvider>
+          <ModalProvider>
+            <PlayerModalProvider>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+            </PlayerModalProvider>
+          </ModalProvider>
+        </MusicPlayerProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );

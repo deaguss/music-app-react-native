@@ -1,12 +1,12 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { Animated, Dimensions, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 import { PlayerControls } from '@/components';
 
 const { height } = Dimensions.get('window');
-const PANEL_HEIGHT = height * 0.99;
+const PANEL_HEIGHT = height;
 
-export default function Player({ onClose }: { onClose: () => void }) {
+const Player = ({ onClose }: { onClose: () => void }) => {
     const translateY = useRef(new Animated.Value(height)).current;
     const sound = useRef<Audio.Sound | null>(null);
 
@@ -85,3 +85,5 @@ const styles = StyleSheet.create({
         elevation: 10,
     },
 });
+
+export default memo(Player);
