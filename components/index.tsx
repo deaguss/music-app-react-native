@@ -4,6 +4,7 @@ import DiscoveryCard from "./discovery-card";
 import PlayerControls from "./player-controler";
 import Player from "./player";
 import ModalComponent from "./modal";
+import ModalFull from "./modal-full";
 
 export {
     CustomButton,
@@ -11,5 +12,6 @@ export {
     DiscoveryCard,
     PlayerControls,
     Player,
-    ModalComponent
+    ModalComponent,
+    ModalFull
 }

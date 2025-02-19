@@ -7,22 +7,33 @@ import icons from '@/constants/icons'
 import { data } from './discover'
 import { useAuth } from '@/context/auth-context'
 import { useModal } from '@/provider/modal-provider'
-import { useRef } from 'react'
+import { useModalFull } from '@/provider/modal-full-provider'
+import { Redirect, router } from 'expo-router'
+import CreateArtist from '@/components/create-artist'
+
 
 
 const account = () => {
-    const { logout, loading, error } = useAuth();
-    const { showModal, isVisible } = useModal()
+    const { logout } = useAuth();
+    const { showModal, isVisible, hideModal } = useModal()
+    const { showModal: showModalFull, hideModal: hideModalFull } = useModalFull()
 
     const handleLogout = async () => {
         try {
-            await logout()
-            console.log('Session berhasil dihapus, logout berhasil.');
-
+            await logout().then(() => {
+                hideModal()
+                console.log('Session berhasil dihapus, logout berhasil.');
+                router.replace("/sign-in");
+            })
         } catch (error) {
             console.error('Gagal menghapus session:', error);
         }
     };
+
+    const handleSetting = () => {
+        router.replace("/main-setting")
+        hideModal()
+    }
 
     return (
         <LinearGradient
@@ -37,6 +48,8 @@ const account = () => {
                     nestedScrollEnabled
                     showsVerticalScrollIndicator={false}
                 >
+                    <CreateArtist />
+
                     <View className="w-full px-4 my-6 flex-row justify-start items-center mb-4 mt-[6.8rem] gap-6">
                         <Image
                             source={images.profile}
@@ -55,7 +68,7 @@ const account = () => {
                         <CustomButton
                             title='Edit'
                             variant='badge'
-                            handlePress={handleLogout} //test
+                            handlePress={() => { }}
                             containerStyles='min-h-[40px] w-[19%] flex-row justify-center items-center px-0 rounded-full'
                         />
 
@@ -89,7 +102,21 @@ const account = () => {
                     </View>
                     {isVisible && (
                         <ModalComponent>
-                            <Text>Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita reprehenderit magnam odit sunt accusamus voluptatem obcaecati eaque quae, repellat architecto autem deserunt aut ut quas laborum dolores. Totam, numquam fugit.</Text>
+                            <View className='mt-6 gap-8'>
+
+                                <TouchableOpacity onPress={showModalFull} className='text-white flex flex-row items-center gap-5'>
+                                    <Image source={icons.plus} className='w-5 h-5' tintColor={'#CDCDE0'} />
+                                    <Text className='text-white/80 font-pregular text-xl'>Registrasion an Artist</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleSetting} className='text-white flex flex-row items-center gap-5'>
+                                    <Image source={icons.setting} className='w-5 h-5' tintColor={'#CDCDE0'} />
+                                    <Text className='text-white/80 font-pregular text-xl'>Setting</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleLogout} className='text-white flex flex-row items-center gap-5'>
+                                    <Image source={icons.logout} className='w-5 h-5' />
+                                    <Text className='text-red-500 font-pregular text-xl'>Logout</Text>
+                                </TouchableOpacity>
+                            </View>
                         </ModalComponent>
                     )}
                 </ScrollView>

@@ -37,12 +37,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       variantTextStyles = "text-white";
       break;
     default:
-      variantContainerStyles = "bg-yellow-500 rounded-xl px-4 min-h-[62px]";
+      variantContainerStyles = "bg-yellow-500 px-4 min-h-[62px]";
       variantTextStyles = "text-white";
       break;
   }
 
-  const baseContainerStyles = ` flex flex-row justify-center items-center  ${variantContainerStyles} ${containerStyles}`;
+  const baseContainerStyles = `flex flex-row justify-center items-center  ${variantContainerStyles} ${containerStyles}`;
   const baseTextStyles = `font-psemibold text-lg ${variantTextStyles} ${textStyles}`;
 
   return (

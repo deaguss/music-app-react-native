@@ -5,13 +5,12 @@ import icons from '@/constants/icons'
 import CreatePlaylist from '@/components/create-playlist'
 import { data } from './discover'
 import { CustomButton, DiscoveryCard } from '@/components'
+import { useModalFull } from '@/provider/modal-full-provider'
 
 const headerData = ['Album', 'Artist', 'Playlist', 'Date']
 
 const library = () => {
-    const [modalVisible, setModalVisible] = useState(false);
-    const handleOpenModal = () => setModalVisible(true);
-
+    const { showModal } = useModalFull()
     return (
         <LinearGradient
             colors={['#393939', '#18181b', '#101010']}
@@ -29,7 +28,7 @@ const library = () => {
                         <Text className="text-white/95 font-psemibold text-[1.7rem] ">My Library</Text>
 
                         <TouchableOpacity
-                            onPress={handleOpenModal}
+                            onPress={showModal}
                             activeOpacity={0.7}
                             className="flex-row items-center gap-2"
                         >
@@ -41,10 +40,7 @@ const library = () => {
                             />
                         </TouchableOpacity>
 
-                        <CreatePlaylist
-                            setModalVisible={setModalVisible}
-                            modalVisible={modalVisible}
-                        />
+                        <CreatePlaylist />
 
                     </View>
                     <View className="w-full px-4 flex-row justify-between gap-x-2 mt-2">

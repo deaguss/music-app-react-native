@@ -20,5 +20,6 @@ export default {
     heartFill: require("../assets/icons/heart-fill.png"),
     download: require("../assets/icons/download.png"),
     shuffle: require("../assets/icons/shuffle.png"),
-    share: require("../assets/icons/share.png")
+    share: require("../assets/icons/share.png"),
+    setting: require("../assets/icons/settings.png"),
 }

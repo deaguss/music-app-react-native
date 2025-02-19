@@ -65,7 +65,14 @@ const authReducer = (state: AuthState, action: Action): AuthState => {
       return { ...state, loading: false, error: action.payload };
 
     case 'LOGOUT':
-      return initialState;
+      return {
+        ...state,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+      };
 
     default:
       return state;
@@ -81,12 +88,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync('auth_token');
       if (token) {
-        // You might want to add token validation here
         dispatch({ type: 'LOGIN_SUCCESS', payload: { user: null, token } });
+      } else {
+        dispatch({ type: 'LOGOUT' });
       }
     };
     loadToken();
   }, []);
+
 
   const handleLogin = async (credentials: User) => {
     try {
@@ -116,11 +125,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await logout();
       await SecureStore.deleteItemAsync('auth_token');
-      dispatch({ type: 'LOGOUT' });
+
+      const token = await SecureStore.getItemAsync('auth_token');
+      if (!token) {
+        dispatch({ type: 'LOGOUT' });
+      } else {
+        console.warn('Token masih ada setelah logout!');
+      }
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
+
 
   const handleForgotPassword = async (email: string) => {
     try {

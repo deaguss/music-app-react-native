@@ -1,27 +1,55 @@
-import React, { memo } from 'react'
-import { Modal as RNModal, View, StyleSheet, Text, Platform } from 'react-native'
-import { Gesture, GestureDetector, Directions } from 'react-native-gesture-handler'
-import { useModal } from '@/provider/modal-provider'
+import React, { memo } from 'react';
+import { Modal as RNModal, View, Text } from 'react-native';
+import {
+    Gesture,
+    GestureDetector,
+    gestureHandlerRootHOC,
+    GestureHandlerRootView
+} from 'react-native-gesture-handler';
+import { useModal } from '@/provider/modal-provider';
 
 interface ModalProps {
-    children?: React.ReactNode
+    children?: React.ReactNode;
 }
 
-const SWIPE_VELOCITY_THRESHOLD = 500
-const SWIPE_DISTANCE_THRESHOLD = 50
+const SWIPE_VELOCITY_THRESHOLD = 300;
+const SWIPE_DISTANCE_THRESHOLD = 30;
 
-const ModalComponent = ({ children }: ModalProps) => {
-    const { isVisible, hideModal } = useModal()
-
+const ModalContent = ({ children, hideModal }: { children?: React.ReactNode; hideModal: () => void; }) => {
     const swipeGesture = Gesture.Pan()
+        .activeOffsetY([-10, 10])
         .onEnd(({ velocityY, translationY }) => {
             if (
-                (translationY > SWIPE_DISTANCE_THRESHOLD && velocityY > SWIPE_VELOCITY_THRESHOLD) ||
-                translationY > SWIPE_DISTANCE_THRESHOLD * 2
+                translationY > SWIPE_DISTANCE_THRESHOLD ||
+                velocityY > SWIPE_VELOCITY_THRESHOLD
             ) {
-                hideModal()
+                hideModal();
             }
-        })
+        });
+
+    return (
+        <View
+            className="flex-1 justify-end bg-black/40 bg-opacity-40"
+            onStartShouldSetResponder={() => true}
+        >
+            <View className="w-10 h-1 bg-zinc-100 rounded self-center mt-2 mb-3" />
+            <GestureDetector gesture={swipeGesture}>
+                <View className="bg-zinc-900 rounded-t-xl p-6 pt-4 h-[40%] min-h-[40%] pb-10">
+                    <Text className="text-sm text-zinc-300 text-center mb-4">
+                        Swipe down to close
+                    </Text>
+                    <View>{children}</View>
+                </View>
+            </GestureDetector>
+        </View>
+
+    );
+};
+
+const WrappedModalContent = gestureHandlerRootHOC(ModalContent);
+
+const ModalComponent = ({ children }: ModalProps) => {
+    const { isVisible, hideModal } = useModal();
 
     return (
         <RNModal
@@ -30,54 +58,16 @@ const ModalComponent = ({ children }: ModalProps) => {
             visible={isVisible}
             onRequestClose={hideModal}
             statusBarTranslucent
+            onPointerEnter={() => console.log("testing")}
         >
-            <View style={styles.overlay}>
-                {/* Handle bar untuk visual feedback */}
-                <View style={styles.handleBar} />
 
-                <GestureDetector gesture={swipeGesture}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.instructionText}>
-                            Geser ke bawah untuk menutup
-                        </Text>
-                        {children}
-                    </View>
-                </GestureDetector>
-            </View>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <WrappedModalContent hideModal={hideModal}>
+                    {children}
+                </WrappedModalContent>
+            </GestureHandlerRootView>
         </RNModal>
-    )
-}
+    );
+};
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    modalContainer: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        padding: 24,
-        paddingTop: 16,
-        maxHeight: '90%',
-        minHeight: '40%',
-    },
-    handleBar: {
-        width: 40,
-        height: 4,
-        backgroundColor: '#ddd',
-        borderRadius: 2,
-        alignSelf: 'center',
-        marginBottom: 12,
-        marginTop: 8,
-    },
-    instructionText: {
-        fontSize: 14,
-        color: '#666',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-})
-
-export default memo(ModalComponent)
+export default memo(ModalComponent);

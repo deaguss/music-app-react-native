@@ -1,4 +1,4 @@
-import { SplashScreen, Stack } from "expo-router";
+import { router, SplashScreen, Stack } from "expo-router";
 import "@/global.css";
 import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
@@ -7,6 +7,9 @@ import { PlayerModalProvider } from "@/provider/player-provider";
 import { AuthProvider } from "@/context/auth-context";
 import { MusicPlayerProvider } from "@/context/music-player-context";
 import { ModalProvider } from "@/provider/modal-provider";
+import { ModalFullProvider } from "@/provider/modal-full-provider";
+import { Image, TouchableOpacity } from "react-native";
+import icons from "@/constants/icons";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,13 +46,32 @@ export default function RootLayout() {
       <AuthProvider>
         <MusicPlayerProvider>
           <ModalProvider>
-            <PlayerModalProvider>
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </Stack>
-            </PlayerModalProvider>
+            <ModalFullProvider>
+              <PlayerModalProvider>
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(setting)"
+                    options={({ navigation }) => ({
+                      title: "Setting",
+                      headerStyle: { backgroundColor: '#121212' },
+                      headerTintColor: '#FFFFFF',
+                      headerLeft: () => (
+                        <TouchableOpacity onPress={() => router.replace("/account")} style={{ marginEnd: 8 }}>
+                          <Image
+                            source={icons.leftArrow}
+                            tintColor={'#FFFFFF'}
+                            style={{ width: 14, height: 14 }}
+                          />
+                        </TouchableOpacity>
+                      ),
+                    })}
+                  />
+                </Stack>
+              </PlayerModalProvider>
+            </ModalFullProvider>
           </ModalProvider>
         </MusicPlayerProvider>
       </AuthProvider>
