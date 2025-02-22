@@ -72,7 +72,7 @@ const SignIn = () => {
               title="Sign In"
               disabled={isDisabled}
               handlePress={isDisabled ? () => { } : handleSubmit}
-              containerStyles="mt-7"
+              containerStyles="mt-7 rounded-lg"
               isLoading={loading}
             />
 
@@ -82,7 +82,7 @@ const SignIn = () => {
               </Text>
               <Link
                 href="/sign-up"
-                className="text-lg font-psemibold text-secondary"
+                className="text-lg font-psemibold text-secondary "
               >
                 Signup
               </Link>

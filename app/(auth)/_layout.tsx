@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 
 const AuthLayout = () => {
   const { isAuthenticated, loading } = useAuth();
+  console.log('Auth state:', { isAuthenticated, loading });
 
   if (!loading && isAuthenticated) return <Redirect href="/discover" />;
 

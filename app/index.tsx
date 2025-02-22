@@ -50,7 +50,7 @@ export default function Index() {
             <CustomButton
               title="Start Listening"
               handlePress={() => router.push("/sign-in")}
-              containerStyles="w-full mt-7"
+              containerStyles="w-full mt-7 rounded-lg"
             />
           </View>
         </ScrollView>

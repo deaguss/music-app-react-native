@@ -1,56 +1,61 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { AuthResponse, login, logout, register, forgotPassword, resetPassword } from '@/api/auth';
+import {
+  User,
+  TOKEN_KEY,
+  USER_KEY,
+  login,
+  register,
+  logout,
+  persistAuthState,
+  clearAuthState,
+} from '@/api/auth';
+import { Platform } from 'react-native';
 
-type AuthState = {
+export enum AuthActionTypes {
+  AUTH_START = 'AUTH_START',
+  AUTH_SUCCESS = 'AUTH_SUCCESS',
+  AUTH_FAILURE = 'AUTH_FAILURE',
+  AUTH_LOGOUT = 'AUTH_LOGOUT',
+  SET_LOADING = 'SET_LOADING',
+}
+
+interface AuthState {
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-};
-
-type User<T = any> = {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-} & T;
+}
 
 type Action =
-  | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: AuthResponse }
-  | { type: 'LOGIN_FAILURE'; payload: string | null }
-  | { type: 'LOGOUT' }
-  | { type: 'REGISTER_START' }
-  | { type: 'REGISTER_SUCCESS'; payload: AuthResponse }
-  | { type: 'REGISTER_FAILURE'; payload: string | null };
-
-type AuthContextType = AuthState & {
-  login: (credentials: User) => Promise<void>;
-  register: (user: User) => Promise<void>;
-  logout: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
-  resetPassword: (data: User) => Promise<void>;
-  clearError: () => void;
-};
+  | { type: AuthActionTypes.AUTH_START }
+  | { type: AuthActionTypes.AUTH_SUCCESS; payload: { user: any; token: string } }
+  | { type: AuthActionTypes.AUTH_FAILURE; payload: string | null }
+  | { type: AuthActionTypes.AUTH_LOGOUT }
+  | { type: AuthActionTypes.SET_LOADING; payload: boolean };
 
 const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  loading: false,
+  loading: true,
   error: null,
 };
 
 const authReducer = (state: AuthState, action: Action): AuthState => {
   switch (action.type) {
-    case 'LOGIN_START':
-    case 'REGISTER_START':
+    case AuthActionTypes.AUTH_START:
       return { ...state, loading: true, error: null };
-
-    case 'LOGIN_SUCCESS':
-    case 'REGISTER_SUCCESS':
+    case AuthActionTypes.AUTH_SUCCESS:
       return {
         ...state,
         user: action.payload.user,
@@ -59,12 +64,16 @@ const authReducer = (state: AuthState, action: Action): AuthState => {
         loading: false,
         error: null,
       };
-
-    case 'LOGIN_FAILURE':
-    case 'REGISTER_FAILURE':
-      return { ...state, loading: false, error: action.payload };
-
-    case 'LOGOUT':
+    case AuthActionTypes.AUTH_FAILURE:
+      return {
+        ...state,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        error: action.payload,
+      };
+    case AuthActionTypes.AUTH_LOGOUT:
       return {
         ...state,
         user: null,
@@ -73,108 +82,157 @@ const authReducer = (state: AuthState, action: Action): AuthState => {
         loading: false,
         error: null,
       };
-
+    case AuthActionTypes.SET_LOADING:
+      return { ...state, loading: action.payload };
     default:
       return state;
   }
 };
 
+interface AuthContextType extends AuthState {
+  login: (credentials: User) => Promise<void>;
+  register: (user: User) => Promise<void>;
+  logout: () => Promise<void>;
+  clearError: () => void;
+}
+
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  useEffect(() => {
-    const loadToken = async () => {
-      const token = await SecureStore.getItemAsync('auth_token');
-      if (token) {
-        dispatch({ type: 'LOGIN_SUCCESS', payload: { user: null, token } });
+  const initializeAuth = useCallback(async () => {
+    try {
+      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
+      const [token, userStr] = await Promise.all([
+        SecureStore.getItemAsync(TOKEN_KEY),
+        SecureStore.getItemAsync(USER_KEY),
+      ]);
+
+      if (token && userStr) {
+        const user = JSON.parse(userStr);
+        dispatch({
+          type: AuthActionTypes.AUTH_SUCCESS,
+          payload: { token, user },
+        });
       } else {
-        dispatch({ type: 'LOGOUT' });
+        dispatch({ type: AuthActionTypes.AUTH_LOGOUT });
       }
-    };
-    loadToken();
+    } catch (error) {
+      dispatch({ type: AuthActionTypes.AUTH_LOGOUT });
+    } finally {
+      dispatch({ type: AuthActionTypes.SET_LOADING, payload: false });
+    }
   }, []);
 
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
-  const handleLogin = async (credentials: User) => {
-    try {
-      dispatch({ type: 'LOGIN_START' });
-      const response = await login(credentials);
+  const handleLogin = useCallback(
+    async (credentials: User) => {
+      const data = {
+        email: credentials.email,
+        password: credentials.password,
+        device_name: `${Platform.OS} ${Platform.Version}`,
+      };
 
-      dispatch({ type: 'LOGIN_SUCCESS', payload: response.data });
-    } catch (error: any) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: error.response?.data?.message || 'Login failed' });
-      throw error;
-    }
-  };
+      try {
+        dispatch({ type: AuthActionTypes.AUTH_START });
+        const response = await login(data);
 
-  const handleRegister = async (user: User) => {
-    try {
-      dispatch({ type: 'REGISTER_START' });
-      const response = await register(user);
-      ;
-      dispatch({ type: 'REGISTER_SUCCESS', payload: response.data });
-    } catch (error: any) {
-      dispatch({ type: 'REGISTER_FAILURE', payload: error.response?.data?.message || 'Registration failed' });
-      throw error;
-    }
-  };
+        if (response.data.token) {
+          const user = { email: credentials.email };
+          await persistAuthState(response.data.token, user);
+          dispatch({
+            type: AuthActionTypes.AUTH_SUCCESS,
+            payload: { token: response.data.token, user },
+          });
+        } else if (response.data.status === 'error') {
+          throw new Error(response.data.message);
+        } else {
+          throw new Error('Login failed: No token received');
+        }
+      } catch (error: any) {
+        console.error('Login error:', error);
+        const errorMessage =
+          error.response?.data?.message || error.message || 'Login failed';
+        dispatch({ type: AuthActionTypes.AUTH_FAILURE, payload: errorMessage });
+        throw new Error(errorMessage);
+      }
+    },
+    []
+  );
 
-  const handleLogout = async () => {
+  const handleRegister = useCallback(
+    async (userData: User) => {
+      const data = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        password_confirmation: userData.password_confirmation,
+        device_name: `${Platform.OS} ${Platform.Version}`,
+      };
+
+      try {
+        dispatch({ type: AuthActionTypes.AUTH_START });
+        const response = await register(data);
+
+        if (response.data.status === 'success' && response.data.token) {
+          const user = { name: userData.name, email: userData.email };
+          await persistAuthState(response.data.token, user);
+          dispatch({
+            type: AuthActionTypes.AUTH_SUCCESS,
+            payload: { token: response.data.token, user },
+          });
+        } else if (response.data.status === 'error') {
+          throw new Error(response.data.message!);
+        } else {
+          throw new Error('Registration failed: Invalid response format');
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          'Registration failed';
+        dispatch({ type: AuthActionTypes.AUTH_FAILURE, payload: errorMessage });
+        throw new Error(errorMessage);
+      }
+    },
+    []
+  );
+
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
-      await SecureStore.deleteItemAsync('auth_token');
-
-      const token = await SecureStore.getItemAsync('auth_token');
-      if (!token) {
-        dispatch({ type: 'LOGOUT' });
-      } else {
-        console.warn('Token masih ada setelah logout!');
-      }
     } catch (error) {
       console.error('Logout error:', error);
+    } finally {
+      await clearAuthState();
+      dispatch({ type: AuthActionTypes.AUTH_LOGOUT });
+      router.replace('/sign-in');
     }
-  };
+  }, []);
 
+  const clearError = useCallback(() => {
+    dispatch({ type: AuthActionTypes.AUTH_FAILURE, payload: null });
+  }, []);
 
-  const handleForgotPassword = async (email: string) => {
-    try {
-      await forgotPassword(email);
-    } catch (error) {
-      console.error('Forgot password error:', error);
-      throw error;
-    }
-  };
-
-  const handleResetPassword = async (data: User) => {
-    try {
-      await resetPassword(data);
-    } catch (error) {
-      console.error('Reset password error:', error);
-      throw error;
-    }
-  };
-
-  const clearError = () => {
-    dispatch({ type: 'LOGIN_FAILURE', payload: null });
-    dispatch({ type: 'REGISTER_FAILURE', payload: null });
-  };
+  const value = useMemo(
+    () => ({
+      ...state,
+      login: handleLogin,
+      register: handleRegister,
+      logout: handleLogout,
+      clearError,
+    }),
+    [state, handleLogin, handleRegister, handleLogout, clearError]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        login: handleLogin,
-        register: handleRegister,
-        logout: handleLogout,
-        forgotPassword: handleForgotPassword,
-        resetPassword: handleResetPassword,
-        clearError,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
   );
 };
 

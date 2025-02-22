@@ -104,7 +104,7 @@ const SignUp = () => {
             <CustomButton
               title="Sign Up"
               handlePress={isDisabled ? () => { } : handleSubmit}
-              containerStyles="mt-7"
+              containerStyles="mt-7 rounded-lg"
               isLoading={loading}
               disabled={isDisabled || loading}
             />

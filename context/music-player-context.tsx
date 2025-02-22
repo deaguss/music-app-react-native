@@ -1,10 +1,28 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useReducer,
+    useEffect,
+    useCallback,
+    useMemo,
+    useRef,
+} from 'react';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { getQueue, getTrack } from '@/api/music';
 import { TrackResponse } from '@/types';
 
+export enum MusicPlayerActionTypes {
+    LOAD_TRACK = 'LOAD_TRACK',
+    PLAY = 'PLAY',
+    PAUSE = 'PAUSE',
+    TOGGLE_PLAYBACK = 'TOGGLE_PLAYBACK',
+    UPDATE_POSITION = 'UPDATE_POSITION',
+    UPDATE_DURATION = 'UPDATE_DURATION',
+    SET_QUEUE = 'SET_QUEUE',
+    SET_ERROR = 'SET_ERROR',
+}
 
-type PlayerState = {
+export type PlayerState = {
     currentTrack: TrackResponse | null;
     isPlaying: boolean;
     position: number;
@@ -14,23 +32,15 @@ type PlayerState = {
     error: string | null;
 };
 
-type Action =
-    | { type: 'LOAD_TRACK'; payload: TrackResponse }
-    | { type: 'PLAY' }
-    | { type: 'PAUSE' }
-    | { type: 'TOGGLE_PLAYBACK' }
-    | { type: 'UPDATE_POSITION'; payload: number }
-    | { type: 'UPDATE_DURATION'; payload: number }
-    | { type: 'SET_QUEUE'; payload: TrackResponse[] }
-    | { type: 'SET_ERROR'; payload: string | null };
-
-type MusicPlayerContextType = PlayerState & {
-    loadTrack: (trackId: string) => Promise<void>;
-    togglePlayback: () => void;
-    seekTo: (position: number) => void;
-    loadQueue: () => Promise<void>;
-    clearError: () => void;
-};
+export type Action =
+    | { type: MusicPlayerActionTypes.LOAD_TRACK; payload: TrackResponse }
+    | { type: MusicPlayerActionTypes.PLAY }
+    | { type: MusicPlayerActionTypes.PAUSE }
+    | { type: MusicPlayerActionTypes.TOGGLE_PLAYBACK }
+    | { type: MusicPlayerActionTypes.UPDATE_POSITION; payload: number }
+    | { type: MusicPlayerActionTypes.UPDATE_DURATION; payload: number }
+    | { type: MusicPlayerActionTypes.SET_QUEUE; payload: TrackResponse[] }
+    | { type: MusicPlayerActionTypes.SET_ERROR; payload: string | null };
 
 const initialState: PlayerState = {
     currentTrack: null,
@@ -44,44 +54,71 @@ const initialState: PlayerState = {
 
 const playerReducer = (state: PlayerState, action: Action): PlayerState => {
     switch (action.type) {
-        case 'LOAD_TRACK':
+        case MusicPlayerActionTypes.LOAD_TRACK:
             return { ...state, currentTrack: action.payload, isLoaded: true };
-        case 'PLAY':
+        case MusicPlayerActionTypes.PLAY:
             return { ...state, isPlaying: true };
-        case 'PAUSE':
+        case MusicPlayerActionTypes.PAUSE:
             return { ...state, isPlaying: false };
-        case 'TOGGLE_PLAYBACK':
+        case MusicPlayerActionTypes.TOGGLE_PLAYBACK:
             return { ...state, isPlaying: !state.isPlaying };
-        case 'UPDATE_POSITION':
+        case MusicPlayerActionTypes.UPDATE_POSITION:
             return { ...state, position: action.payload };
-        case 'UPDATE_DURATION':
+        case MusicPlayerActionTypes.UPDATE_DURATION:
             return { ...state, duration: action.payload };
-        case 'SET_QUEUE':
+        case MusicPlayerActionTypes.SET_QUEUE:
             return { ...state, queue: action.payload };
-        case 'SET_ERROR':
+        case MusicPlayerActionTypes.SET_ERROR:
             return { ...state, error: action.payload };
         default:
             return state;
     }
 };
 
-const MusicPlayerContext = createContext<MusicPlayerContextType>({} as MusicPlayerContextType);
+export type MusicPlayerContextType = PlayerState & {
+    loadTrack: (trackId: string) => Promise<void>;
+    togglePlayback: () => Promise<void>;
+    seekTo: (position: number) => Promise<void>;
+    loadQueue: () => Promise<void>;
+    clearError: () => void;
+};
 
-export const MusicPlayerProvider = ({ children }: { children: React.ReactNode }) => {
+const MusicPlayerContext = createContext<MusicPlayerContextType>(
+    {} as MusicPlayerContextType
+);
+
+export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
     const [state, dispatch] = useReducer(playerReducer, initialState);
-    const soundRef = React.useRef<Audio.Sound | null>(null);
+    const soundRef = useRef<Audio.Sound | null>(null);
 
-    const loadTrack = async (trackId: string) => {
+    const onPlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
+        if (status.isLoaded) {
+            dispatch({
+                type: MusicPlayerActionTypes.UPDATE_POSITION,
+                payload: status.positionMillis,
+            });
+            if (status.durationMillis) {
+                dispatch({
+                    type: MusicPlayerActionTypes.UPDATE_DURATION,
+                    payload: status.durationMillis,
+                });
+            }
+        }
+    }, []);
+
+    const loadTrack = useCallback(async (trackId: string) => {
         try {
             const response = await getTrack(trackId);
             const track = response.data;
 
-            // Unload previous track
+            // Unload previous track jika ada
             if (soundRef.current) {
                 await soundRef.current.unloadAsync();
             }
 
-            // Load new track
+            // Atur mode audio agar tetap aktif di background
             await Audio.setAudioModeAsync({
                 staysActiveInBackground: true,
                 playsInSilentModeIOS: true,
@@ -94,54 +131,53 @@ export const MusicPlayerProvider = ({ children }: { children: React.ReactNode })
             );
 
             soundRef.current = sound;
-            dispatch({ type: 'LOAD_TRACK', payload: track });
+            dispatch({ type: MusicPlayerActionTypes.LOAD_TRACK, payload: track });
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to load track' });
+            dispatch({
+                type: MusicPlayerActionTypes.SET_ERROR,
+                payload: 'Failed to load track',
+            });
         }
-    };
+    }, [onPlaybackStatusUpdate]);
 
-    const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-        if (status.isLoaded) {
-            dispatch({ type: 'UPDATE_POSITION', payload: status.positionMillis });
-            if (status.durationMillis) {
-                dispatch({ type: 'UPDATE_DURATION', payload: status.durationMillis });
-            }
-        }
-    };
-
-    const togglePlayback = async () => {
+    const togglePlayback = useCallback(async () => {
         if (!soundRef.current) return;
-
         const status = await soundRef.current.getStatusAsync();
         if (status.isLoaded) {
             if (status.isPlaying) {
                 await soundRef.current.pauseAsync();
-                dispatch({ type: 'PAUSE' });
+                dispatch({ type: MusicPlayerActionTypes.PAUSE });
             } else {
                 await soundRef.current.playAsync();
-                dispatch({ type: 'PLAY' });
+                dispatch({ type: MusicPlayerActionTypes.PLAY });
             }
         }
-    };
+    }, []);
 
-    const seekTo = async (position: number) => {
+    const seekTo = useCallback(async (position: number) => {
         if (soundRef.current) {
             await soundRef.current.setPositionAsync(position);
         }
-    };
+    }, []);
 
-    const loadQueue = async () => {
+    const loadQueue = useCallback(async () => {
         try {
             const response = await getQueue();
-            dispatch({ type: 'SET_QUEUE', payload: response?.data });
+            dispatch({
+                type: MusicPlayerActionTypes.SET_QUEUE,
+                payload: response.data,
+            });
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to load queue' });
+            dispatch({
+                type: MusicPlayerActionTypes.SET_ERROR,
+                payload: 'Failed to load queue',
+            });
         }
-    };
+    }, []);
 
-    const clearError = () => {
-        dispatch({ type: 'SET_ERROR', payload: null });
-    };
+    const clearError = useCallback(() => {
+        dispatch({ type: MusicPlayerActionTypes.SET_ERROR, payload: null });
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -151,17 +187,20 @@ export const MusicPlayerProvider = ({ children }: { children: React.ReactNode })
         };
     }, []);
 
+    const value = useMemo(
+        () => ({
+            ...state,
+            loadTrack,
+            togglePlayback,
+            seekTo,
+            loadQueue,
+            clearError,
+        }),
+        [state, loadTrack, togglePlayback, seekTo, loadQueue, clearError]
+    );
+
     return (
-        <MusicPlayerContext.Provider
-            value={{
-                ...state,
-                loadTrack,
-                togglePlayback,
-                seekTo,
-                loadQueue,
-                clearError,
-            }}
-        >
+        <MusicPlayerContext.Provider value={value}>
             {children}
         </MusicPlayerContext.Provider>
     );
